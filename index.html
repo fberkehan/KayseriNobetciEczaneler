@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Kayseri Nöbetçi Eczaneler</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,400;0,500;0,600;1,200&display=swap" rel="stylesheet"></head>
+<body>
+    <div id="loadingScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; display: flex; align-items: center; justify-content: center; z-index: 9999;">
+        <div class="spinner-border text-danger" role="status">
+            
+        </div>
+    </div>
+    
+<div class="container mt-4">
+    <div class="row">
+        <!-- <div class="header mb-4">
+            <img src="head.svg" style="max-height: 100px;">
+        </div> -->
+        <div class="col-12">
+            <input type="text" class="form-control mb-4" placeholder="Eczane adı giriniz..." onkeyup="searchEczane(event)">
+            <p id="watchdate" style="font-family: 'Poppins';font-weight: 900;color: #00AEC4;text-align: center;font-size: 23px;"></p>
+            <div id="eczaneList" class="row"></div>
+        </div>
+    </div>
+    <div>
+        <p style="font-family: 'Poppins';font-weight: 500;color: #000000;text-align: center;">Fuber Ltd Tarafından<span style="color:#FA0435"> ♥</span> ile Kayseri'de Geliştirildi.</p>
+    </div>
+</div>
+
+
+<script>
+    async function fetchEczaneler() {
+        try {
+            let response = await fetch('https://api.allorigins.win/raw?url=https://acikveri.kayseri.bel.tr/api/kbb/eczane');
+            if (response.ok) {
+                let data = await response.json();
+                displayData(data);
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+
+            } else {
+                console.error('Network response was not ok ' + response.statusText);
+            }
+        } catch (error) {
+            console.error('Error fetching eczane data:', error);
+        }
+    }
+
+    function displayData(data) {
+        const list = document.getElementById('eczaneList');
+        var watchdiv = document.getElementById('watchdate');
+        watchdiv.innerHTML = new Date().toLocaleDateString('tr-TR');
+        list.innerHTML = '';
+        data.forEach(eczane => {
+            const eczaneDiv = document.createElement('div');
+            eczaneDiv.className = 'col-md-4 mb-4';
+            eczaneDiv.innerHTML = `
+            <div class="card" onClick="location.href='https://www.google.com/maps/dir/?api=1&destination=Kayseri%20${encodeURIComponent(eczane.address+', '+eczane.name)}'">
+
+                    <div class="card-body">
+                        <h5 class="card-title" style="font-family: 'Poppins';font-weight: 900;color: #FD003C">${eczane.name}</h5>
+                        <p class="card-text">
+                            <span style="font-family: 'Poppins';font-weight: 500">${eczane.address}</span><br/><br/>
+                            <a href="tel:${eczane.phone}" style=" font-weight: bold; color: green; text-decoration: none;">
+   📞 ${eczane.phone}
+</a><br/>
+                            <i style="font-family: 'Poppins';font-weight: 900;text-align:right;float: right;color: #FD003C">${eczane.watchType}</i><br>
+                        </p>
+                    </div>
+                </div>
+            `;
+            list.appendChild(eczaneDiv);
+        });
+    }
+
+    function searchEczane(event) {
+        const query = event.target.value.toLowerCase();
+        const eczanes = document.querySelectorAll('.col-md-4');
+
+        eczanes.forEach(eczane => {
+            const name = eczane.querySelector('.card-title').textContent.toLowerCase();
+            if(name.includes(query)) {
+                eczane.style.display = '';
+            } else {
+                eczane.style.display = 'none';
+            }
+        });
+    }
+
+    fetchEczaneler();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
